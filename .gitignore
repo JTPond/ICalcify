@@ -1,0 +1,4 @@
+*.swp
+*.pyc
+*.ipynb
+__pycache__

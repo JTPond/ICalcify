@@ -6,6 +6,7 @@ from io import BytesIO
 import json
 from pathlib import Path
 
+
 def read_msg(filename):
     if type(filename) == str:
         with open(filename,"rb") as f:
@@ -21,6 +22,7 @@ def read_jsonc(filename):
     elif type(filename) == Path:
         with filename.open("r") as f:
              return Tree.from_dict(json.loads(f.read()))
+
 
 class BaseBranch(object):
     def __init__(self, name, dtype, branch):
@@ -40,8 +42,12 @@ class BaseBranch(object):
         return "Branch(Name: '{}', Type: '{}', Length: {})".format(self.name,self.dtype,self.__len__())
 
     def __str__(self):
-        return "Name: '{}'\n{}\n...\n{}\nType: '{}', Len: {}".format(self.name,"\n".join([str(x) for x in self.branch[:10]]),
-                                                                        "\n".join([str(x) for x in self.branch[-10:]]),self.dtype,self.__len__())
+        ll = self.__len__()
+        if ll > 20:
+            return "Name: '{}'\n{}\n...\n{}\nType: '{}', Len: {}".format(self.name,"\n".join([str(x) for x in self.branch[:10]]),
+                                                                        "\n".join([str(x) for x in self.branch[-10:]]),self.dtype,ll)
+        else:
+            return "Name: '{}'\n{}\nType: '{}', Len: {}".format(self.name,"\n".join([str(x) for x in self.branch]),self.dtype,ll)
 
                 
 class StringBranch(BaseBranch):
@@ -83,12 +89,12 @@ class BinBranch(BaseBranch):
         return "Name: '{}'\n{}\n...\n{}\nType: '{}', Len: {}".format(self.name,"\n".join(["{}, range({}, {})".format(int(x[0]),x[1][0],x[1][1]) for x in self.branch[:10]]),
                                                                     "\n".join(["{}, range({}, {})".format(int(x[0]),x[1][0],x[1][1]) for x in self.branch[-10:]]),self.dtype,self.__len__())
 
-
 class PointBranch(BaseBranch):
     def __init__(self,name,branch):
         branch = np.array(branch)
         super().__init__(name,'Point',branch)
-       
+
+
 def Branch(name, dtype, branch):
     if dtype == 'String':
         return StringBranch(name,branch)
@@ -109,20 +115,29 @@ def Branch(name, dtype, branch):
     else:
         raise ValueError('Argument, \'dtype\' is not an accepted value.')
 
+
 class Tree(object):
     def __init__(self):
         self.metadata = {}
         self.branches = {}
+        self.plots = {}
+        self.fits = {}
         
     def from_dict(tree_dict):
         tTree = Tree()
         branches = tree_dict.pop('branches',False)
+        plots = tree_dict.pop('plots',{})
+        fits = tree_dict.pop('fits',{})
         if branches:
             tTree.metadata = tree_dict
             for key in branches:
                 tTree.branches[key] = Branch(key,branches[key]['subtype'],branches[key]['branch'])
         else:
             raise RuntimeError('No \'Branches\' field in input dictionary.')
+        for key in plots:
+            tTree.plots[key] = Branch(key,plots[key]['subtype'],plots[key]['branch'])
+        for key in fits:
+            tTree.fits[key] = Branch(key,fits[key]['subtype'],fits[key]['branch'])
         return tTree
 
     def __getitem__(self, key):
@@ -138,6 +153,12 @@ class Tree(object):
         out += "Branches: \n"
         for branch in self.branches:
             out += "\t{}\n".format(self.branches[branch].__repr__())
+        out += "Plots: \n"
+        for branch in self.plots:
+            out += "\t{}\n".format(self.plots[branch].__repr__())
+        out += "Fits: \n"
+        for branch in self.fits:
+            out += "\t{}\n".format(self.fits[branch].__repr__())
         return out
 
     def __str__(self):
@@ -148,4 +169,10 @@ class Tree(object):
         out += "{} branches: \n".format(len(self.branches))
         for branch in self.branches:
             out += "\t{}\n".format(self.branches[branch].__repr__())
+        out += "{} plots: \n".format(len(self.plots))
+        for branch in self.plots:
+            out += "\t{}\n".format(self.plots[branch].__repr__())
+        out += "{} fits: \n".format(len(self.fits))
+        for branch in self.fits:
+            out += "\t{}\n".format(self.fits[branch].__repr__())
         return out
