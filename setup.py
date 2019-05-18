@@ -8,12 +8,11 @@ with open("LICENSE","r") as f:
 
 setuptools.setup(
     name="icalcify-jtpond42",
-    version="0.0.2",
+    version="0.0.24",
     author="Josh Pond",
     author_email="jtpond42@gmail.com",
     description="Interactive analysis tool for Calcify Trees.",
     long_description=long_description,
-    long_description_content_type="text/markdown",
     url="https://github.com/JTPond/ICalcify",
     license=license,
     packages=setuptools.find_packages(),
