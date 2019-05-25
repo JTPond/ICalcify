@@ -8,7 +8,7 @@ with open("LICENSE","r") as f:
 
 setuptools.setup(
     name="icalcify-jtpond42",
-    version="0.0.24",
+    version="0.0.25",
     author="Josh Pond",
     author_email="jtpond42@gmail.com",
     description="Interactive analysis tool for Calcify Trees.",
@@ -22,5 +22,10 @@ setuptools.setup(
         "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent"
     ],
+    install_requires=[
+                  'numpy',
+                  'scipy',
+                  'matplotlib',
+                        ],
     entry_points = {'console_scripts':['icalcify=ICalcify.command_line:main'],}
 )
