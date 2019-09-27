@@ -23,9 +23,12 @@ setuptools.setup(
         "Operating System :: OS Independent"
     ],
     install_requires=[
+                  'msgpack',
+                  'msgpack_numpy',
                   'numpy',
-                  'scipy',
                   'matplotlib',
+                  'scipy',
+                  'IPython'
                         ],
     entry_points = {'console_scripts':['icalcify=ICalcify.command_line:main'],}
 )

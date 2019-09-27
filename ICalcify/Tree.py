@@ -1,6 +1,5 @@
 import msgpack as msg
 import msgpack_numpy as m
-m.patch()
 import numpy as np
 from io import BytesIO
 import json
@@ -8,11 +7,13 @@ from pathlib import Path
 
 from ICalcify.branches import Branch
 
+m.patch()
+
 class Tree(object):
     def __init__(self):
         self.metadata = {}
         self.branches = {}
-        
+
     def from_dict(tree_dict):
         tTree = Tree()
         branches = tree_dict.pop('branches',False)

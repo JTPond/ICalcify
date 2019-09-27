@@ -1,12 +1,13 @@
 import msgpack as msg
 import msgpack_numpy as m
-m.patch()
 import numpy as np
 from io import BytesIO
 import json
 from pathlib import Path
 
 from ICalcify.Tree import Tree
+
+m.patch()
 
 def read_msg(filename):
     if type(filename) == str:
@@ -35,6 +36,3 @@ def read(filename):
         return Tree
     except IndexError:
         exit("Filename must contain file extension.")
-
-
-

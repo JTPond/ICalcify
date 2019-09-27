@@ -1,6 +1,5 @@
 import msgpack as msg
 import msgpack_numpy as m
-m.patch()
 import numpy as np
 from io import BytesIO
 import json
@@ -9,6 +8,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import pyplot as plt
 from scipy.optimize import curve_fit
 from ICalcify.fitting import FittingResult
+m.patch()
 
 class BaseBranch(object):
     def __init__(self, name, dtype, branch):
@@ -20,10 +20,10 @@ class BaseBranch(object):
             self.branch = branch
         else:
             raise TypeError('Argument \'Branch\' must be of type list, or numpy.(nd)array, got {}'.format(type(branch)))
-        
+
     def __len__(self):
         return len(self.branch)
-    
+
     def __repr__(self):
         return "Branch(Name: '{}', Type: '{}', Length: {})".format(self.name,self.dtype,self.__len__())
 
@@ -35,7 +35,7 @@ class BaseBranch(object):
         else:
             return "Name: '{}'\n{}\nType: '{}', Len: {}".format(self.name,"\n".join([str(x) for x in self.branch]),self.dtype,ll)
 
-                
+
 class StringBranch(BaseBranch):
     def __init__(self,name,branch):
         branch = np.array(branch)
@@ -104,7 +104,7 @@ class BinBranch(BaseBranch):
         plt.legend()
         if show:
             plt.show()
-        
+
     def fit(self,func):
         x = []
         y = []
@@ -157,5 +157,3 @@ def Branch(name, dtype, branch):
         return PointBranch(name,branch)
     else:
         raise ValueError('Argument, \'dtype\' is not an accepted value.')
-
-
