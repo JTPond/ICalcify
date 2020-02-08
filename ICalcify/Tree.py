@@ -17,12 +17,17 @@ class Tree(object):
     def from_dict(tree_dict):
         tTree = Tree()
         branches = tree_dict.pop('branches',False)
+        feeds = tree_dict.pop('datafeeds',False)
         if branches:
             tTree.metadata = tree_dict
             for key in branches:
                 tTree.branches[key] = Branch(key,branches[key]['subtype'],branches[key]['branch'])
+        elif feeds:
+            tTree.metadata = tree_dict
+            for key in feeds:
+                tTree.branches[key] = Branch(key,tTree.metadata['SubType'],feeds[key])
         else:
-            raise RuntimeError('No \'Branches\' field in input dictionary.')
+            raise RuntimeError('Structure does not match Tree, or FeedTree specs')
         return tTree
 
     def _ipython_key_completions_(self):
