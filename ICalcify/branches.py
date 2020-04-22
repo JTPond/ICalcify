@@ -35,6 +35,12 @@ class BaseBranch(object):
         else:
             return "Name: '{}'\n{}\nType: '{}', Len: {}".format(self.name,"\n".join([str(x) for x in self.branch]),self.dtype,ll)
 
+    def __iter__(self):
+        return self.branch.__iter__()
+
+    def __next__(self):
+        return self.branch.__next__()
+
 
 class StringBranch(BaseBranch):
     def __init__(self,name,branch):

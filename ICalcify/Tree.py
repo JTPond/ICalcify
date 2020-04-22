@@ -9,6 +9,38 @@ from ICalcify.branches import Branch
 
 m.patch()
 
+def read_msg(filename):
+    try:
+        with filename.open("rb") as f:
+            return Tree.from_dict(msg.unpackb(f.read(),raw=False, object_hook=m.decode))
+    except Exception as e:
+        print("{} raised {}, returning empty Tree".format(filename.name,repr(e)))
+        return Tree()
+
+def read_jsonc(filename):
+    try:
+        with filename.open("r") as f:
+            return Tree.from_dict(json.loads(f.read()))
+    except Exception as e:
+        print("{} raised {}, returning empty Tree".format(filename.name,repr(e)))
+        return Tree()
+
+def read(filename, retname=False):
+    filename = Path(filename)
+    try:
+        if filename.suffix == ".msg":
+            Tree = read_msg(filename)
+        elif filename.suffix == ".jsonc":
+            Tree = read_jsonc(filename)
+        else:
+            raise IOError("Unsuported file extension: {}".format(filename.suffix))
+        if retname:
+            return filename.stem, Tree
+        # Else
+        return Tree
+    except IndexError:
+        exit("Filename must contain file extension.")
+
 class Tree(object):
     def __init__(self):
         self.metadata = {}
@@ -65,3 +97,9 @@ class Tree(object):
         for branch in self.branches:
             out += "\t{}\n".format(self.branches[branch].__repr__())
         return out
+
+    def __len__(self):
+        return len(self.branches)
+
+    def __iter__(self):
+        return self.branches.__iter__()

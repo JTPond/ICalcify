@@ -12,17 +12,14 @@ import argparse
 
 def main():
     parser = argparse.ArgumentParser(description="ICalcify Explorer: Interactive analysis tool for Calcify Trees.")
-    parser.add_argument("filename", type=str, help="Filepath to open as Tree. Must contain file extension. [.jsonc, .msg]")
+    parser.add_argument("filename", type=str, nargs='*', help="Filepaths to open as Tree. Must contain file extension. [.jsonc, .msg]")
     args = parser.parse_args()
-    fname = args.filename
-    try:
-        Tree = ic.read(fname)
-        str_tree = str(Tree)
-    except IOError:
-        Tree = None
-        str_tree = "Import error on {}".format(fname)
+    fnames = args.filename
+    trees = dict([ic.read(f,retname=True) for f in fnames])
+    Explorer = ic.Explorer(trees)
+    str_exp = str(Explorer)
     header = """Welcome to ICalcify. All commands must be valid Python3
-IPython version and kernel information above, as usual. 
+IPython version and kernel information above, as usual.
 
 Namespaces included:
     ICalcify as ic
@@ -33,8 +30,9 @@ Namespaces included:
     matplotlib.pyplot as plt
     plt.show as show
 
-Tree:
+Explorer:
 
 {}"""
-    embed(header=header.format(str_tree))
-
+    embed(header=header.format(str_exp))
+if __name__ == '__main__':
+    main()
