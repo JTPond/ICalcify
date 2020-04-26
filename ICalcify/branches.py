@@ -25,7 +25,7 @@ class BaseBranch(object):
         return len(self.branch)
 
     def __repr__(self):
-        return "Branch(Name: '{}', Type: '{}', Length: {})".format(self.name,self.dtype,self.__len__())
+        return "{{Name: '{}', Type: '{}', Length: {}}}".format(self.name,self.dtype,self.__len__())
 
     def __str__(self):
         ll = self.__len__()
@@ -40,6 +40,9 @@ class BaseBranch(object):
 
     def __next__(self):
         return self.branch.__next__()
+
+    def _repr_html_(self):
+        return "<h3><b>'{}':</b> Type: '{}', Length: {}</h3>".format(self.name,self.dtype,self.__len__())
 
 
 class StringBranch(BaseBranch):

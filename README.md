@@ -12,18 +12,29 @@ Clone the repository and from inside run:
 This will install the `icalcify` command line tool and the ICalcify library.
 
 ## Usage examples
+### CLI
+```
+usage: icalcify [-h] [-b] [filename [filename ...]]
+
+ICalcify Explorer: Interactive analysis tool for Calcify Trees.
+
+positional arguments:
+  filename      Filepaths to open as Tree. Must contain file extension.
+                [.jsonc, .msg]
+
+optional arguments:
+  -h, --help    show this help message and exit
+  -b, --buffer  Buffer reading of Tree files in the Explorer
+
+```
 ### Example 1: from the calcify/examples/universe\_in\_a\_box
 #### Startup
 
 Run:
-
-`icalcify [-h] [filename [filename ...]]`, where filename is a .msg, or .jsonc Tree file from Calcify. The extension is required.
-
-Try `icalcify *.msg` when you have a lot of Trees to browse.
-
+`> icalcify universe.msg`
 This will open the an IPython shell with a variable called `Explorer` of type ICalcify.Explorer.
 
-```
+```python
 Python 3.5.3 (default, Sep 27 2018, 17:25:39)
 Type 'copyright', 'credits' or 'license' for more information
 IPython 7.2.0 -- An enhanced Interactive Python. Type '?' for help.
@@ -49,7 +60,59 @@ Explorer:
 
 We can save some writing by starting with:
 
-`In [1]: Tree = Explorer['universe']`
+```python
+In [1]: Tree = Explorer['universe']
+
+In [2]: Tree
+Out[2]:
+Name: universe_in_a_box
+	Desc: A Tree including branches for the simple universe in a box multiparticle simulation.
+	Details: Universe Range: 1, Number of Particles: 500, Delta T: 0.01, Time steps: 2000, Total Time: 20
+	Run on: 04/18/2020 17:23
+
+In [3]: print(Tree)
+Name: universe_in_a_box
+10 branches:
+	{Name: 'init_state', Type: 'ThreeVec', Length: 500}
+	{Name: 'init_hist', Type: 'Bin', Length: 500}
+	{Name: 'mid1_hist', Type: 'Bin', Length: 500}
+	{Name: 'fin_state', Type: 'ThreeVec', Length: 500}
+	{Name: 'mid2_state', Type: 'ThreeVec', Length: 500}
+	{Name: 'mid1_state', Type: 'ThreeVec', Length: 500}
+	{Name: 'fin_spread', Type: 'Point', Length: 404}
+	{Name: 'init_spread', Type: 'Point', Length: 383}
+	{Name: 'mid2_hist', Type: 'Bin', Length: 500}
+	{Name: 'fin_hist', Type: 'Bin', Length: 500}
+
+```
+#### Buffered Explorer
+`> icalcify -b universe.msg`
+
+Will instead give you:
+
+```python
+Python 3.5.3 (default, Sep 27 2018, 17:25:39)
+
+...
+
+Explorer:
+
+	universe: *buffered
+
+
+In [1]: Explorer['universe']                                                                                                     
+Out[1]:
+Name: universe_in_a_box
+	Desc: A Tree including branches for the simple universe in a box multiparticle simulation.
+	Details: Universe Range: 1, Number of Particles: 500, Delta T: 0.01, Time steps: 2000, Total Time: 20
+	Run on: 04/18/2020 17:23
+
+In [2]: Explorer                                                                                                  
+Out[2]: 	universe: 10 branches
+
+```
+
+`ICalcify.Explorer.load_all()` will load all buffered Trees into the Explorer.
 
 #### Plotting
 
@@ -130,3 +193,7 @@ In [2]: Tree['mid2_hist'].fit(ft.Gaussian).plot(True)
 ```
 
 ![Ex4](img/img_4.png?raw=true "Example 4")
+
+#### Jupyter
+
+![Ex5](img/img_5.png?raw=true "Example 5")

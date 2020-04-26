@@ -25,21 +25,22 @@ def read_jsonc(filename):
         print("{} raised {}, returning empty Tree".format(filename.name,repr(e)))
         return Tree()
 
-def read(filename, retname=False):
+def read(filename, buffer=False, retname=False):
     filename = Path(filename)
-    try:
-        if filename.suffix == ".msg":
-            Tree = read_msg(filename)
-        elif filename.suffix == ".jsonc":
-            Tree = read_jsonc(filename)
-        else:
-            raise IOError("Unsuported file extension: {}".format(filename.suffix))
-        if retname:
-            return filename.stem, Tree
-        # Else
-        return Tree
-    except IndexError:
-        exit("Filename must contain file extension.")
+    if buffer:
+        return filename.stem, lambda fname=filename.resolve(True): read(fname)
+
+    if filename.suffix == '.msg':
+        Tree = read_msg(filename)
+    elif filename.suffix == '.jsonc':
+        Tree = read_jsonc(filename)
+    else:
+        raise ValueError("File extension must .msg, or .jsonc")
+
+    if retname:
+        return filename.stem, Tree
+
+    return Tree
 
 class Tree(object):
     def __init__(self):
@@ -66,10 +67,10 @@ class Tree(object):
         return list(self.branches.keys()) + list(self.metadata.keys())
 
     def __getitem__(self, key):
-        if key in self.metadata:
-            return self.metadata[key]
-        elif key in self.branches:
+        if key in self.branches:
             return self.branches[key]
+        elif key in self.metadata:
+            return self.metadata[key]
         else:
             raise KeyError("\'{}\' not in metadata, or branches".format(key))
 
@@ -83,16 +84,21 @@ class Tree(object):
 
     def __repr__(self):
         out = "Name: {}\n".format(self.metadata['Name'])
-        out += "Branches: \n"
-        for branch in self.branches:
-            out += "\t{}\n".format(self.branches[branch].__repr__())
+        for key in self.metadata:
+            if not key == 'Name':
+                out += "\t{}: {}\n".format(key, self.metadata[key])
+        return out
+
+    def _repr_html_(self):
+        out = "<h2><u>{}</u></h2>".format(self.metadata['Name'])
+        for key in self.metadata:
+            if not key == 'Name':
+                out += "<h3 style=\"margin: 20px;\"><b>{}</b>: {}</h3>".format(key, self.metadata[key])
+        out += "<h3 style=\"margin: 20px;\"><b>Branches</b>: {}</h3>".format(self.__len__())
         return out
 
     def __str__(self):
         out = "Name: {}\n".format(self.metadata['Name'])
-        for key in self.metadata:
-            if not key == 'Name':
-                out += "{}: {}\n".format(key, self.metadata[key])
         out += "{} branches: \n".format(len(self.branches))
         for branch in self.branches:
             out += "\t{}\n".format(self.branches[branch].__repr__())

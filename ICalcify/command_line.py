@@ -12,11 +12,11 @@ import argparse
 
 def main():
     parser = argparse.ArgumentParser(description="ICalcify Explorer: Interactive analysis tool for Calcify Trees.")
+    parser.add_argument("-b", "--buffer", help="Buffer reading of Tree files in the Explorer", action="store_true")
     parser.add_argument("filename", type=str, nargs='*', help="Filepaths to open as Tree. Must contain file extension. [.jsonc, .msg]")
     args = parser.parse_args()
     fnames = args.filename
-    trees = dict([ic.read(f,retname=True) for f in fnames])
-    Explorer = ic.Explorer(trees)
+    Explorer = ic.New(fnames,buffer=args.buffer)
     str_exp = str(Explorer)
     header = """Welcome to ICalcify. All commands must be valid Python3
 IPython version and kernel information above, as usual.
