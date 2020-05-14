@@ -147,6 +147,11 @@ class PointBranch(BaseBranch):
         popt, pcov = curve_fit(func,self.branch[:,0],self.branch[:1])
         return FittingResult(func,self.branch[:0],popt,pcov,self.name)
 
+class ObjectBranch(BaseBranch):
+    def __init__(self,name,branch):
+        branch = np.array(branch)
+        super().__init__(name,'Object',branch)
+
 def Branch(name, dtype, branch):
     if dtype == 'String':
         return StringBranch(name,branch)
@@ -164,5 +169,7 @@ def Branch(name, dtype, branch):
         return BinBranch(name,branch)
     elif dtype == 'Point':
         return PointBranch(name,branch)
+    elif dtype == 'Object':
+        return ObjectBranch(name,branch)
     else:
         raise ValueError('Argument, \'dtype\' is not an accepted value.')

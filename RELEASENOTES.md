@@ -1,5 +1,9 @@
 # Release Notes
 
+### 0.0.6 2020-05-13
+
+* Support Object Branches
+
 ### 0.0.5 2020-04-26
 
 * Added buffered reading of Trees into the Explorer
