@@ -10,7 +10,7 @@ from scipy.optimize import curve_fit
 from ICalcify.fitting import FittingResult
 m.patch()
 
-class BaseBranch(object):
+class ObjectBranch(object):
     def __init__(self, name, dtype, branch):
         self.name = name
         self.dtype = dtype
@@ -45,12 +45,12 @@ class BaseBranch(object):
         return "<h3><b>'{}':</b> Type: '{}', Length: {}</h3>".format(self.name,self.dtype,self.__len__())
 
 
-class StringBranch(BaseBranch):
+class StringBranch(ObjectBranch):
     def __init__(self,name,branch):
         branch = np.array(branch)
         super().__init__(name,'String',branch)
 
-class FloatBranch(BaseBranch):
+class FloatBranch(ObjectBranch):
     def __init__(self,name,branch):
         branch = np.array(branch,dtype=np.float64)
         super().__init__(name,'f64',branch)
@@ -62,10 +62,16 @@ class FloatBranch(BaseBranch):
         if show:
             plt.show()
 
-class ThreeVecBranch(BaseBranch):
+class ThreeVecBranch(ObjectBranch):
     def __init__(self,name,branch):
+        if len(branch) > 0:
+            if type(branch[0]) == dict:
+                branch = np.array(list(map(ThreeVecBranch.from_dict,branch)))
         branch = np.array(branch)
         super().__init__(name,'ThreeVec',branch)
+
+    def from_dict(obj):
+        return np.array([obj['x0'],obj['x1'],obj['x2']])
 
     def scatter(self,show=False):
         fig = plt.figure()
@@ -77,25 +83,50 @@ class ThreeVecBranch(BaseBranch):
         if show:
             plt.show()
 
-class ThreeMatBranch(BaseBranch):
+class ThreeMatBranch(ObjectBranch):
     def __init__(self,name,branch):
+        if len(branch) > 0:
+            if type(branch[0]) == dict:
+                branch = np.array(list(map(ThreeMatBranch.from_dict,branch)))
         branch = np.array(branch)
         super().__init__(name,'ThreeMat',branch)
 
-class FourVecBranch(BaseBranch):
+    def from_dict(obj):
+        return np.array([np.array([obj[ky]['x0'],obj[ky]['x1'],obj[ky]['x2']]) for ky in obj])
+
+class FourVecBranch(ObjectBranch):
     def __init__(self,name,branch):
+        if len(branch) > 0:
+            if type(branch[0]) == dict:
+                branch = np.array(list(map(FourVecBranch.from_dict,branch)))
         branch = np.array(branch)
         super().__init__(name,'FourVec',branch)
 
-class FourMatBranch(BaseBranch):
+    def from_dict(obj):
+        return np.array([obj['x0'],obj['x1'],obj['x2'],obj['x3']])
+
+class FourMatBranch(ObjectBranch):
     def __init__(self,name,branch):
+        if len(branch) > 0:
+            if type(branch[0]) == dict:
+                branch = np.array(list(map(FourMatBranch.from_dict,branch)))
         branch = np.array(branch)
         super().__init__(name,'FourMat',branch)
 
-class BinBranch(BaseBranch):
+    def from_dict(obj):
+        return np.array([np.array([obj[ky]['x0'],obj[ky]['x1'],obj[ky]['x2'],obj[ky]['x3']]) for ky in obj])
+
+class BinBranch(ObjectBranch):
     def __init__(self,name,branch):
-        branch = np.array([np.array([np.float64(x[0]),np.array(x[1],dtype=np.float64)]) for x in branch])
+        if len(branch) > 0:
+            if type(branch[0]) == dict:
+                branch = np.array(list(map(BinBranch.from_dict,branch)))
+            else:
+                branch = np.array([np.array([np.float64(x[0]),np.array(x[1],dtype=np.float64)]) for x in branch])
         super().__init__(name,'Bin',branch)
+
+    def from_dict(obj):
+        return np.array([obj['count'],np.array(obj['range'])])
 
     def __str__(self):
         return "Name: '{}'\n{}\n...\n{}\nType: '{}', Len: {}".format(
@@ -124,10 +155,16 @@ class BinBranch(BaseBranch):
         return FittingResult(func,x,popt,pcov,self.name)
 
 
-class PointBranch(BaseBranch):
+class PointBranch(ObjectBranch):
     def __init__(self,name,branch):
+        if len(branch) > 0:
+            if type(branch[0]) == dict:
+                branch = np.array(list(map(PointBranch.from_dict,branch)))
         branch = np.array(branch)
         super().__init__(name,'Point',branch)
+
+    def from_dict(obj):
+        return np.array([obj['x'],obj['y']])
 
     def plot(self,show=False):
         # f, ax = plt.subplots()
@@ -147,11 +184,6 @@ class PointBranch(BaseBranch):
         popt, pcov = curve_fit(func,self.branch[:,0],self.branch[:1])
         return FittingResult(func,self.branch[:0],popt,pcov,self.name)
 
-class ObjectBranch(BaseBranch):
-    def __init__(self,name,branch):
-        branch = np.array(branch)
-        super().__init__(name,'Object',branch)
-
 def Branch(name, dtype, branch):
     if dtype == 'String':
         return StringBranch(name,branch)
@@ -170,6 +202,6 @@ def Branch(name, dtype, branch):
     elif dtype == 'Point':
         return PointBranch(name,branch)
     elif dtype == 'Object':
-        return ObjectBranch(name,branch)
+        return ObjectBranch(name,dtype,branch)
     else:
-        raise ValueError('Argument, \'dtype\' is not an accepted value.')
+        raise ValueError(f"Argument, '{dtype}' is not an accepted value.")

@@ -13,7 +13,7 @@ import argparse
 def main():
     parser = argparse.ArgumentParser(description="ICalcify Explorer: Interactive analysis tool for Calcify Trees.")
     parser.add_argument("-b", "--buffer", help="Buffer reading of Tree files in the Explorer", action="store_true")
-    parser.add_argument("filename", type=str, nargs='*', help="Filepaths to open as Tree. Must contain file extension. [.jsonc, .msg]")
+    parser.add_argument("filename", type=str, nargs='*', help="Filepaths to open as Tree. Must contain file extension. [.json, .msg]")
     args = parser.parse_args()
     fnames = args.filename
     Explorer = ic.New(fnames,buffer=args.buffer)

@@ -17,7 +17,7 @@ def read_msg(filename):
         print("{} raised {}, returning empty Tree".format(filename.name,repr(e)))
         return Tree()
 
-def read_jsonc(filename):
+def read_json(filename):
     try:
         with filename.open("r") as f:
             return Tree.from_dict(json.loads(f.read()))
@@ -32,10 +32,10 @@ def read(filename, buffer=False, retname=False):
 
     if filename.suffix == '.msg':
         Tree = read_msg(filename)
-    elif filename.suffix == '.jsonc':
-        Tree = read_jsonc(filename)
+    elif filename.suffix == '.json':
+        Tree = read_json(filename)
     else:
-        raise ValueError("File extension must .msg, or .jsonc")
+        raise ValueError("File extension must .msg, or .json")
 
     if retname:
         return filename.stem, Tree

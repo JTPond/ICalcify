@@ -1,5 +1,9 @@
 # Release Notes
 
+### 0.1 2020-06-06
+
+* *END SUPPORT FOR JSONC in favor of JSON*
+
 ### 0.0.6 2020-05-13
 
 * Support Object Branches

@@ -20,7 +20,7 @@ ICalcify Explorer: Interactive analysis tool for Calcify Trees.
 
 positional arguments:
   filename      Filepaths to open as Tree. Must contain file extension.
-                [.jsonc, .msg]
+                [.json, .msg]
 
 optional arguments:
   -h, --help    show this help message and exit
@@ -113,6 +113,10 @@ Out[2]: 	universe: 10 branches
 ```
 
 `ICalcify.Explorer.load_all()` will load all buffered Trees into the Explorer.
+
+#### ObjectBranches
+
+If you have a FeedTree of subtype Object it will be read in as a regular tree of ObjectBranches where the data is read in verbatim as python dicts. These branches implement `__iter__(self)` so they should be easy for the user to convert to whatever type they like.
 
 #### Plotting
 

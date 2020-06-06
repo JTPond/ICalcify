@@ -8,7 +8,7 @@ with open("LICENSE","r") as f:
 
 setuptools.setup(
     name="icalcify-jtpond42",
-    version="0.0.6",
+    version="0.1",
     author="Josh Pond",
     author_email="jtpond42@gmail.com",
     description="Interactive analysis tool for Calcify Trees.",
