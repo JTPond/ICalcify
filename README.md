@@ -34,7 +34,7 @@ Run:
 `> icalcify universe.msg`
 This will open the an IPython shell with a variable called `Explorer` of type ICalcify.Explorer.
 
-```python
+```
 Python 3.5.3 (default, Sep 27 2018, 17:25:39)
 Type 'copyright', 'credits' or 'license' for more information
 IPython 7.2.0 -- An enhanced Interactive Python. Type '?' for help.
@@ -122,7 +122,9 @@ If you have a FeedTree of subtype Object it will be read in as a regular tree of
 
 From here you can run:
 
-`In [1]: Tree['fin_hist'].plot(True)`
+```python
+In [1]: Tree['fin_hist'].plot(True)
+```
 (The plot function takes a boolean argument that defaults to False which can call plt.show() if set to True)
 
 which opens a pyplot window such as:
@@ -131,7 +133,7 @@ which opens a pyplot window such as:
 
 To show multiple plots:
 
-```
+```python
 In [1]: Tree['mid2_hist'].plot()
 
 In [2]: Tree['fin_hist'].plot(True)
@@ -139,7 +141,7 @@ In [2]: Tree['fin_hist'].plot(True)
 
 or
 
-```
+```python
 In [1]: Tree['mid2_hist'].plot()
 
 In [2]: Tree['fin_hist'].plot()
@@ -153,7 +155,9 @@ will give you:
 
 You can also get a scatter plot of ThreeVec branches with:
 
-`In [1]: Tree['mid2_state'].scatter(True)`
+```python
+In [1]: Tree['mid2_state'].scatter(True)
+```
 
 ![Ex3](img/img_3.png?raw=true "Example 3")
 
@@ -163,26 +167,28 @@ Built in fitting functions include Gaussian, BrietWigner, exponential, and linea
 
 To do a fit run:
 
-```
+```python
 In [1]: Tree['mid2_hist'].fit(ft.Gaussian)
 Out[1]:
 Parameters:
-        x0 = 7.8031859841299775 +- 0.48292339703133214
-        x1 = 0.8229363430601933 +- 0.023861344606247444
-        x2 = 0.31201350865832883 +- 0.026763654689396284
+	x0 = 1.340 +- 0.044
+	x1 = 0.878 +- 0.021
+	x2 = 0.519 +- 0.030
+
 ```
 
 or
 
-```
+```python
 In [1]: FitRes = Tree['mid2_hist'].fit(ft.Gaussian)
 
 In [2]: FitRes
 Out[2]
 Parameters:
-        x0 = 7.8031859841299775 +- 0.48292339703133214
-        x1 = 0.8229363430601933 +- 0.023861344606247444
-        x2 = 0.31201350865832883 +- 0.026763654689396284
+	x0 = 1.340 +- 0.044
+	x1 = 0.878 +- 0.021
+	x2 = 0.519 +- 0.030
+
 
 In [3]: type(FitRes)
 Out[3]: ICalcify.fitting.FittingResult
@@ -190,7 +196,7 @@ Out[3]: ICalcify.fitting.FittingResult
 
 To plot the result over the original:
 
-```
+```python
 In [1]: Tree['mid2_hist'].plot()
 
 In [2]: Tree['mid2_hist'].fit(ft.Gaussian).plot(True)
@@ -198,6 +204,41 @@ In [2]: Tree['mid2_hist'].fit(ft.Gaussian).plot(True)
 
 ![Ex4](img/img_4.png?raw=true "Example 4")
 
+#### Regression
+
+If you have two `FloatBranch`s,
+
+```python
+In [1]: g = ic.Branch('g','f64',[1.0,2.0,3.0])
+   ...: h = ic.Branch('h','f64',[2.0,4.0,6.0])
+```
+then you can plot them against each other,
+
+```python
+In [2]: type(g.against(h))                   
+Out[2]: ICalcify.branches.PointBranch
+
+In [3]: g.against(h).scatter(True)
+```
+
+![Ex5](img/img_6.png?raw=true "Example 5")
+
+and get a regression,
+
+```python
+In [4]: g.against(h).linreg()                                          
+Out[4]: Slope: 2.000, Intercept: 0.000, R: 1.000, P: 0.000, Err: 0.000
+```
+and plot it,
+
+```python
+In [5]: g.against(h).scatter()                                                              
+
+In [6]: g.against(h).linreg().plot(True)
+```
+
+![Ex6](img/img_7.png?raw=true "Example 6")
+
 #### Jupyter
 
-![Ex5](img/img_5.png?raw=true "Example 5")
+![Ex7](img/img_5.png?raw=true "Example 7")
