@@ -7,7 +7,7 @@ with open("LICENSE","r") as f:
     license = f.read()
 
 setuptools.setup(
-    name="icalcify-jtpond42",
+    name="icalcify",
     version="0.1",
     author="Josh Pond",
     author_email="jtpond42@gmail.com",

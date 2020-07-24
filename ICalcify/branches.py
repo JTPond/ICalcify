@@ -7,7 +7,9 @@ from pathlib import Path
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import pyplot as plt
 from scipy.optimize import curve_fit
+from scipy.stats import linregress
 from ICalcify.fitting import FittingResult
+from ICalcify.regression import RegResult
 m.patch()
 
 class ObjectBranch(object):
@@ -54,6 +56,13 @@ class FloatBranch(ObjectBranch):
     def __init__(self,name,branch):
         branch = np.array(branch,dtype=np.float64)
         super().__init__(name,'f64',branch)
+
+    def against(self, other):
+        if not type(other) == FloatBranch:
+            raise TypeError("Other branch must be of type FloatBranch")
+        if not len(self.branch) == len(other.branch):
+            raise RuntimeError("Both self and other branch must be the same length.")
+        return PointBranch(f"{self.name} X {other.name}",np.array([[x,y] for x,y in zip(self.branch,other.branch)]))
 
     def plot(self,show=False):
         # f, ax = plt.subplots()
@@ -181,8 +190,11 @@ class PointBranch(ObjectBranch):
             plt.show()
 
     def fit(self,func):
-        popt, pcov = curve_fit(func,self.branch[:,0],self.branch[:1])
-        return FittingResult(func,self.branch[:0],popt,pcov,self.name)
+        popt, pcov = curve_fit(func,self.branch[:,0],self.branch[:,1])
+        return FittingResult(func,self.branch[:,0],popt,pcov,self.name)
+
+    def linreg(self):
+        return RegResult(self.branch[:,0],*linregress(self.branch))
 
 def Branch(name, dtype, branch):
     if dtype == 'String':

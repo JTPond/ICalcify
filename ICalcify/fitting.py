@@ -28,11 +28,17 @@ class FittingResult(object):
         self.popt = popt
         self.pcov = pcov
         self.label = label
-        
+
     def __repr__(self):
         errs = np.sqrt(np.diag(self.pcov))
         return "Parameters:\n{}".format(
-            "\n".join(["\tx{} = {} +- {}".format(i,x,errs[i]) for i,x in enumerate(self.popt)])    
+            "\n".join(["\tx{} = {:.3f} +- {:.3f}".format(i,x,errs[i]) for i,x in enumerate(self.popt)])
+        )
+
+    def _repr_html_(self):
+        errs = np.sqrt(np.diag(self.pcov))
+        return "<h3>Parameters:</h3><ul>{}</ul>".format(
+            "\n".join(["<li>x{} = {:.3f} +- {:.3f}</li>".format(i,x,errs[i]) for i,x in enumerate(self.popt)])    
         )
 
     def plot(self,show=False):
@@ -41,4 +47,3 @@ class FittingResult(object):
         plt.legend()
         if show:
             plt.show()
-
