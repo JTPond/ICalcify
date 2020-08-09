@@ -204,7 +204,7 @@ In [2]: Tree['mid2_hist'].fit(ft.Gaussian).plot(True)
 
 ![Ex4](img/img_4.png?raw=true "Example 4")
 
-#### Regression
+#### Other
 
 If you have two `FloatBranch`s,
 
@@ -222,22 +222,6 @@ In [3]: g.against(h).scatter(True)
 ```
 
 ![Ex5](img/img_6.png?raw=true "Example 5")
-
-and get a regression,
-
-```python
-In [4]: g.against(h).linreg()                                          
-Out[4]: Slope: 2.000, Intercept: 0.000, R: 1.000, P: 0.000, Err: 0.000
-```
-and plot it,
-
-```python
-In [5]: g.against(h).scatter()                                                              
-
-In [6]: g.against(h).linreg().plot(True)
-```
-
-![Ex6](img/img_7.png?raw=true "Example 6")
 
 #### Jupyter
 
