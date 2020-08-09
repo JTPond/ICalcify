@@ -28,22 +28,25 @@ class FittingResult(object):
         self.popt = popt
         self.pcov = pcov
         self.label = label
+        self.errs = np.sqrt(np.diag(self.pcov))
 
     def __repr__(self):
-        errs = np.sqrt(np.diag(self.pcov))
         return "Parameters:\n{}".format(
-            "\n".join(["\tx{} = {:.3f} +- {:.3f}".format(i,x,errs[i]) for i,x in enumerate(self.popt)])
+            "\n".join(["\tx{} = {:.3f} +- {:.3f}".format(i,x,self.errs[i]) for i,x in enumerate(self.popt)])
         )
 
     def _repr_html_(self):
-        errs = np.sqrt(np.diag(self.pcov))
         return "<h3>Parameters:</h3><ul>{}</ul>".format(
-            "\n".join(["<li>x{} = {:.3f} +- {:.3f}</li>".format(i,x,errs[i]) for i,x in enumerate(self.popt)])    
+            "\n".join(["<li>x{} = {:.3f} +- {:.3f}</li>".format(i,x,self.errs[i]) for i,x in enumerate(self.popt)])
         )
 
-    def plot(self,show=False):
+    def plot(self,show=False,error=False):
         ydata = [self.func(x, *self.popt) for x in self.xdata]
         plt.plot(self.xdata,ydata,label=self.label+".Fit")
         plt.legend()
+        if error:
+            peydata = [self.func(x, *(o+e for o,e in zip(self.popt,self.errs))) for x in self.xdata]
+            neydata = [self.func(x, *(o-e for o,e in zip(self.popt,self.errs))) for x in self.xdata]
+            plt.fill_between(self.xdata,peydata,neydata,alpha=0.6)
         if show:
             plt.show()

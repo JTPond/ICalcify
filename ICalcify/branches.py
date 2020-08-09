@@ -46,6 +46,9 @@ class ObjectBranch(object):
     def _repr_html_(self):
         return "<h3><b>'{}':</b> Type: '{}', Length: {}</h3>".format(self.name,self.dtype,self.__len__())
 
+    def cut(self,callable):
+        return Branch(f"{self.name}_Cut",self.dtype,self.branch[[callable(x) for x in self.branch]])
+
 
 class StringBranch(ObjectBranch):
     def __init__(self,name,branch):
@@ -131,7 +134,7 @@ class BinBranch(ObjectBranch):
             if type(branch[0]) == dict:
                 branch = np.array(list(map(BinBranch.from_dict,branch)))
             else:
-                branch = np.array([np.array([np.float64(x[0]),np.array(x[1],dtype=np.float64)]) for x in branch])
+                branch = np.array([np.array([np.float64(x[0]),np.array(x[1],dtype=np.float64)],dtype='object') for x in branch])
         super().__init__(name,'Bin',branch)
 
     def from_dict(obj):
@@ -192,9 +195,6 @@ class PointBranch(ObjectBranch):
     def fit(self,func):
         popt, pcov = curve_fit(func,self.branch[:,0],self.branch[:,1])
         return FittingResult(func,self.branch[:,0],popt,pcov,self.name)
-
-    def linreg(self):
-        return RegResult(self.branch[:,0],*linregress(self.branch))
 
 def Branch(name, dtype, branch):
     if dtype == 'String':
