@@ -223,6 +223,62 @@ In [3]: g.against(h).scatter(True)
 
 ![Ex5](img/img_6.png?raw=true "Example 5")
 
+If you want to filter/cut a Branch,
+
+```python
+In [1]: bib = ic.Branch('Time','Bin',[[i,[i,i]] for i in range(300)])
+
+In [2]: print(bib)
+Out[2]: Name: 'Time'
+    0, range(0.0, 0.0)
+    1, range(1.0, 1.0)
+    2, range(2.0, 2.0)
+    3, range(3.0, 3.0)
+    4, range(4.0, 4.0)
+    5, range(5.0, 5.0)
+    6, range(6.0, 6.0)
+    7, range(7.0, 7.0)
+    8, range(8.0, 8.0)
+    9, range(9.0, 9.0)
+    ...
+    290, range(290.0, 290.0)
+    291, range(291.0, 291.0)
+    292, range(292.0, 292.0)
+    293, range(293.0, 293.0)
+    294, range(294.0, 294.0)
+    295, range(295.0, 295.0)
+    296, range(296.0, 296.0)
+    297, range(297.0, 297.0)
+    298, range(298.0, 298.0)
+    299, range(299.0, 299.0)
+    Type: 'Bin', Len: 300
+
+In [3]: print(bib.cut(lambda x: x[1][0] > 100))
+Out[3]: Name: 'Time_Cut'
+    101, range(101.0, 101.0)
+    102, range(102.0, 102.0)
+    103, range(103.0, 103.0)
+    104, range(104.0, 104.0)
+    105, range(105.0, 105.0)
+    106, range(106.0, 106.0)
+    107, range(107.0, 107.0)
+    108, range(108.0, 108.0)
+    109, range(109.0, 109.0)
+    110, range(110.0, 110.0)
+    ...
+    290, range(290.0, 290.0)
+    291, range(291.0, 291.0)
+    292, range(292.0, 292.0)
+    293, range(293.0, 293.0)
+    294, range(294.0, 294.0)
+    295, range(295.0, 295.0)
+    296, range(296.0, 296.0)
+    297, range(297.0, 297.0)
+    298, range(298.0, 298.0)
+    299, range(299.0, 299.0)
+    Type: 'Bin', Len: 199
+```
+
 #### Jupyter
 
 ![Ex7](img/img_5.png?raw=true "Example 7")
