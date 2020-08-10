@@ -67,9 +67,9 @@ class FloatBranch(ObjectBranch):
             raise RuntimeError("Both self and other branch must be the same length.")
         return PointBranch(f"{self.name} X {other.name}",np.array([[x,y] for x,y in zip(self.branch,other.branch)]))
 
-    def plot(self,show=False):
+    def plot(self,show=False,flag=None):
         # f, ax = plt.subplots()
-        plt.plot(np.arange(self.__len__()),self.branch,label=self.name)
+        plt.plot(np.arange(self.__len__()),self.branch,label=f"{self.name}_{flag}" if flag else self.name)
         plt.legend()
         if show:
             plt.show()
@@ -145,14 +145,14 @@ class BinBranch(ObjectBranch):
                 self.name,"\n".join(["{}, range({}, {})".format(int(x[0]),x[1][0],x[1][1]) for x in self.branch[:10]]),
                 "\n".join(["{}, range({}, {})".format(int(x[0]),x[1][0],x[1][1]) for x in self.branch[-10:]]),self.dtype,self.__len__())
 
-    def plot(self,show=False):
+    def plot(self,show=False,flag=None):
         # f, ax = plt.subplots()
         x = []
         y = []
         for bin in self.branch:
             x += list(bin[1])
             y += [bin[0],bin[0]]
-        plt.plot(x,y,label=self.name)
+        plt.plot(x,y,label=f"{self.name}_{flag}" if flag else self.name)
         plt.legend()
         if show:
             plt.show()
@@ -178,16 +178,16 @@ class PointBranch(ObjectBranch):
     def from_dict(obj):
         return np.array([obj['x'],obj['y']])
 
-    def plot(self,show=False):
+    def plot(self,show=False,flag=None):
         # f, ax = plt.subplots()
-        plt.plot(self.branch[:,0],self.branch[:,1],label=self.name)
+        plt.plot(self.branch[:,0],self.branch[:,1],label=f"{self.name}_{flag}" if flag else self.name)
         plt.legend()
         if show:
             plt.show()
 
-    def scatter(self,show=False):
+    def scatter(self,show=False,flag=None):
         # f, ax = plt.subplots()
-        plt.plot(self.branch[:,0],self.branch[:,1],marker='o',linestyle='',label=self.name)
+        plt.plot(self.branch[:,0],self.branch[:,1],marker='o',linestyle='',label=f"{self.name}_{flag}" if flag else self.name)
         plt.legend()
         if show:
             plt.show()
