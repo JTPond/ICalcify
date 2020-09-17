@@ -20,6 +20,15 @@ def exponential(x,a,b,c):
 def linear(x,m,b):
     return m*x + b
 
+def poly2(x, a,b,c):
+    return a + b*(x) + c*(x**2.0)
+
+def poly3(x, a,b,c,d):
+    return a + b*(x) + c*(x**2.0) + d*(x**3.0)
+
+def poly4(x, a,b,c,d,e):
+    return a + b*(x) + c*(x**2.0) + d*(x**3.0) + e*(x**4.0)
+
 
 class FittingResult(object):
     def __init__(self,func,xdata,popt,pcov,label="Result"):
