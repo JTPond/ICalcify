@@ -196,6 +196,35 @@ class PointBranch(ObjectBranch):
         popt, pcov = curve_fit(func,self.branch[:,0],self.branch[:,1])
         return FittingResult(func,self.branch[:,0],popt,pcov,self.name)
 
+class PointBinBranch(ObjectBranch):
+    def __init__(self,name,branch):
+        if len(branch) > 0:
+            if type(branch[0]) == dict:
+                branch = np.array(list(map(PointBinBranch.from_dict,branch)))
+        branch = np.array(branch)
+        super().__init__(name,'PointBin',branch)
+
+    def from_dict(obj):
+        return np.array([float(obj['count']),np.array(obj['range'])])
+
+    def plot(self,show=False,flag=None):
+        # f, ax = plt.subplots()
+        x = [self.branch[0][1][0]]
+        y = [self.branch[0][1][2]]
+        counts = []
+        for bin in self.branch:
+            if bin[1][1] > x[-1]:
+                counts.append([])
+            x.append(bin[1][1])
+            y.append(bin[1][3])
+            counts[-1].append(bin[0])
+        plt.imshow(counts,extent=[x[0],x[-1],y[0],y[-1]])
+
+        plt.colorbar()
+        if show:
+            plt.show()
+
+
 def Branch(name, dtype, branch):
     if dtype == 'String':
         return StringBranch(name,branch)
@@ -213,6 +242,8 @@ def Branch(name, dtype, branch):
         return BinBranch(name,branch)
     elif dtype == 'Point':
         return PointBranch(name,branch)
+    elif dtype == 'PointBin':
+        return PointBinBranch(name,branch)
     elif dtype == 'Object':
         return ObjectBranch(name,dtype,branch)
     else:
