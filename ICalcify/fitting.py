@@ -50,6 +50,8 @@ class FittingResult(object):
         )
 
     def plot(self,show=False,error=False):
+        if show:
+            plt.figure()
         ydata = [self.func(x, *self.popt) for x in self.xdata]
         plt.plot(self.xdata,ydata,label=self.label+".Fit")
         plt.legend()

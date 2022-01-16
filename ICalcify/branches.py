@@ -17,7 +17,7 @@ class ObjectBranch(object):
         self.name = name
         self.dtype = dtype
         if type(branch) == list:
-            self.branch = np.array(branch)
+            self.branch = np.array(branch,dtype=object)
         elif type(branch) == np.array or type(branch) == np.ndarray:
             self.branch = branch
         else:
@@ -68,7 +68,8 @@ class FloatBranch(ObjectBranch):
         return PointBranch(f"{self.name} X {other.name}",np.array([[x,y] for x,y in zip(self.branch,other.branch)]))
 
     def plot(self,show=False,flag=None):
-        # f, ax = plt.subplots()
+        if show:
+            plt.figure()
         plt.plot(np.arange(self.__len__()),self.branch,label=f"{self.name}_{flag}" if flag else self.name)
         plt.legend()
         if show:
@@ -132,13 +133,13 @@ class BinBranch(ObjectBranch):
     def __init__(self,name,branch):
         if len(branch) > 0:
             if type(branch[0]) == dict:
-                branch = np.array(list(map(BinBranch.from_dict,branch)))
+                branch = np.array(list(map(BinBranch.from_dict,branch)),dtype=object)
             else:
-                branch = np.array([np.array([np.float64(x[0]),np.array(x[1],dtype=np.float64)],dtype='object') for x in branch])
+                branch = np.array([np.array([np.float64(x[0]),np.array(x[1],dtype=np.float64)],dtype='object') for x in branch],dtype=object)
         super().__init__(name,'Bin',branch)
 
     def from_dict(obj):
-        return np.array([obj['count'],np.array(obj['range'])])
+        return np.array([obj['count'],np.array(obj['range'])],dtype=object)
 
     def __str__(self):
         return "Name: '{}'\n{}\n...\n{}\nType: '{}', Len: {}".format(
@@ -146,7 +147,8 @@ class BinBranch(ObjectBranch):
                 "\n".join(["{}, range({}, {})".format(int(x[0]),x[1][0],x[1][1]) for x in self.branch[-10:]]),self.dtype,self.__len__())
 
     def plot(self,show=False,flag=None):
-        # f, ax = plt.subplots()
+        if show:
+            plt.figure()
         x = []
         y = []
         for bin in self.branch:
@@ -179,14 +181,16 @@ class PointBranch(ObjectBranch):
         return np.array([obj['x'],obj['y']])
 
     def plot(self,show=False,flag=None):
-        # f, ax = plt.subplots()
+        if show:
+            plt.figure()
         plt.plot(self.branch[:,0],self.branch[:,1],label=f"{self.name}_{flag}" if flag else self.name)
         plt.legend()
         if show:
             plt.show()
 
     def scatter(self,show=False,flag=None):
-        # f, ax = plt.subplots()
+        if show:
+            plt.figure()
         plt.plot(self.branch[:,0],self.branch[:,1],marker='o',linestyle='',label=f"{self.name}_{flag}" if flag else self.name)
         plt.legend()
         if show:
@@ -201,14 +205,15 @@ class PointBinBranch(ObjectBranch):
         if len(branch) > 0:
             if type(branch[0]) == dict:
                 branch = np.array(list(map(PointBinBranch.from_dict,branch)))
-        branch = np.array(branch)
+        branch = np.array(branch,dtype=object)
         super().__init__(name,'PointBin',branch)
 
     def from_dict(obj):
         return np.array([float(obj['count']),np.array(obj['range'])])
 
     def plot(self,show=False,flag=None):
-        # f, ax = plt.subplots()
+        if show:
+            plt.figure()
         x = [self.branch[0][1][0]]
         y = [self.branch[0][1][2]]
         counts = []

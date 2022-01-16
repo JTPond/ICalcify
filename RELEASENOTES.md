@@ -19,3 +19,11 @@
 * Added Explorer class and the ability to read more than one file from the command line.
 
 * Added iterability to Branches for element-wise iteration. And to Explorers and Trees for iterating over keys.
+
+### 0.1.0: 2022-01-16
+
+* Supports new calcify::PointBin type
+    * Plot 2D hist
+
+
+* Added plt.figure so the ion environment works

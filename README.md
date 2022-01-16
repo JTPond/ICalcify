@@ -35,9 +35,9 @@ Run:
 This will open the an IPython shell with a variable called `Explorer` of type ICalcify.Explorer.
 
 ```
-Python 3.5.3 (default, Sep 27 2018, 17:25:39)
+Python <VERSION>
 Type 'copyright', 'credits' or 'license' for more information
-IPython 7.2.0 -- An enhanced Interactive Python. Type '?' for help.
+IPython <VERSION> -- An enhanced Interactive Python. Type '?' for help.
 
 
 Welcome to ICalcify. All commands must be valid Python3
@@ -160,6 +160,14 @@ In [1]: Tree['mid2_state'].scatter(True)
 ```
 
 ![Ex3](img/img_3.png?raw=true "Example 3")
+
+To show multiple figures without blocking call:
+
+```python
+In [1]: plt.ion()
+
+In [2]: Tree['fin_hist'].plot(True)
+```
 
 #### Fitting
 
