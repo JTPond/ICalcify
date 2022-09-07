@@ -1,7 +1,6 @@
 import msgpack as msg
 import msgpack_numpy as m
 import numpy as np
-from io import BytesIO
 import json
 from pathlib import Path
 
@@ -9,7 +8,7 @@ from ICalcify.branches import Branch
 
 m.patch()
 
-def read_msg(filename):
+def read_msg(filename: Path) -> "Tree":
     try:
         with filename.open("rb") as f:
             return Tree.from_dict(msg.unpackb(f.read(),raw=False, object_hook=m.decode))
@@ -17,7 +16,7 @@ def read_msg(filename):
         print("{} raised {}, returning empty Tree".format(filename.name,repr(e)))
         return Tree()
 
-def read_json(filename):
+def read_json(filename: Path) -> "Tree":
     try:
         with filename.open("r") as f:
             return Tree.from_dict(json.loads(f.read()))
@@ -25,7 +24,7 @@ def read_json(filename):
         print("{} raised {}, returning empty Tree".format(filename.name,repr(e)))
         return Tree()
 
-def read(filename, buffer=False, retname=False):
+def read(filename: Path | str, buffer=False, retname=False):
     filename = Path(filename)
     if buffer:
         return filename.stem, lambda fname=filename.resolve(True): read(fname)

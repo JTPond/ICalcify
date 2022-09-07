@@ -28,6 +28,9 @@ class Explorer(object):
         else:
             raise KeyError("\'{}\' not valid Tree".format(key))
 
+    def __setitem__(self, name: str, tree: Tree) -> None:
+        self.trees[name] = tree
+
     def __contains__(self, key):
         if key in self.trees:
             return True
