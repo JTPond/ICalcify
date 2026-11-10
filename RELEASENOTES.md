@@ -1,5 +1,12 @@
 # Release Notes
 
+### 0.1.2: 2026-11-10
+
+* Python 3.15 and NumPy 2.x readiness
+* Migrated packaging to PEP 621 `pyproject.toml`
+* Removed stale `base` and `regression` imports
+* Added `@staticmethod` decorators to `from_dict` constructors and fixed `PointBinBranch` inhomogeneous array creation
+
 ### 0.1.1: 2022-01-16
 
 * Supports new calcify::PointBin type

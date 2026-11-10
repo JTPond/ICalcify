@@ -1,4 +1,3 @@
-import scipy as sc
 import numpy as np
 from matplotlib import pyplot as plt
 

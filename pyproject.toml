@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "icalcify"
+version = "0.1.2"
+description = "Interactive analysis tool for Calcify Trees."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT OR Apache-2.0"
+license-files = ["LICENSE"]
+authors = [
+    { name = "Josh Pond", email = "jtpond42@gmail.com" },
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "msgpack",
+    "msgpack-numpy",
+    "numpy",
+    "matplotlib",
+    "scipy",
+    "ipython",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+]
+
+[project.urls]
+Homepage = "https://github.com/JTPond/ICalcify"
+Repository = "https://github.com/JTPond/ICalcify"
+
+[project.scripts]
+icalcify = "ICalcify.command_line:main"
+
+[tool.setuptools.packages.find]
+include = ["ICalcify*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

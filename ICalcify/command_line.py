@@ -7,7 +7,6 @@ import scipy as sc
 import scipy.optimize as opt
 from matplotlib import pyplot as plt
 from matplotlib.pyplot import show
-import json
 import argparse
 
 def main():

@@ -8,56 +8,60 @@ from ICalcify.branches import Branch
 
 m.patch()
 
-def read_msg(filename: Path) -> "Tree":
+def read_msg(filename: Path | str) -> "Tree":
+    filename = Path(filename)
     try:
         with filename.open("rb") as f:
-            return Tree.from_dict(msg.unpackb(f.read(),raw=False, object_hook=m.decode))
+            return Tree.from_dict(msg.unpackb(f.read(), raw=False, object_hook=m.decode))
     except Exception as e:
-        print("{} raised {}, returning empty Tree".format(filename.name,repr(e)))
+        print("{} raised {}, returning empty Tree".format(filename.name, repr(e)))
         return Tree()
 
-def read_json(filename: Path) -> "Tree":
+def read_json(filename: Path | str) -> "Tree":
+    filename = Path(filename)
     try:
-        with filename.open("r") as f:
+        with filename.open("r", encoding="utf-8") as f:
             return Tree.from_dict(json.loads(f.read()))
     except Exception as e:
-        print("{} raised {}, returning empty Tree".format(filename.name,repr(e)))
+        print("{} raised {}, returning empty Tree".format(filename.name, repr(e)))
         return Tree()
 
 def read(filename: Path | str, buffer=False, retname=False):
     filename = Path(filename)
     if buffer:
-        return filename.stem, lambda fname=filename.resolve(True): read(fname)
+        return filename.stem, lambda fname=filename.resolve(strict=True): read(fname)
 
     if filename.suffix == '.msg':
-        Tree = read_msg(filename)
+        tree = read_msg(filename)
     elif filename.suffix == '.json':
-        Tree = read_json(filename)
+        tree = read_json(filename)
     else:
         raise ValueError("File extension must .msg, or .json")
 
     if retname:
-        return filename.stem, Tree
+        return filename.stem, tree
 
-    return Tree
+    return tree
 
 class Tree(object):
     def __init__(self):
         self.metadata = {}
         self.branches = {}
 
+    @staticmethod
     def from_dict(tree_dict):
+        tree_dict = dict(tree_dict)
         tTree = Tree()
-        branches = tree_dict.pop('branches',False)
-        feeds = tree_dict.pop('datafeeds',False)
+        branches = tree_dict.pop('branches', False)
+        feeds = tree_dict.pop('datafeeds', False)
         if branches:
             tTree.metadata = tree_dict
             for key in branches:
-                tTree.branches[key] = Branch(key,branches[key]['subtype'],branches[key]['branch'])
+                tTree.branches[key] = Branch(key, branches[key]['subtype'], branches[key]['branch'])
         elif feeds:
             tTree.metadata = tree_dict
             for key in feeds:
-                tTree.branches[key] = Branch(key,tTree.metadata['SubType'],feeds[key])
+                tTree.branches[key] = Branch(key, tTree.metadata['SubType'], feeds[key])
         else:
             raise RuntimeError('Structure does not match Tree, or FeedTree specs')
         return tTree
@@ -82,14 +86,16 @@ class Tree(object):
             return False
 
     def __repr__(self):
-        out = "Name: {}\n".format(self.metadata['Name'])
+        name = self.metadata.get('Name', 'EMPTY')
+        out = "Name: {}\n".format(name)
         for key in self.metadata:
             if not key == 'Name':
                 out += "\t{}: {}\n".format(key, self.metadata[key])
         return out
 
     def _repr_html_(self):
-        out = "<h2><u>{}</u></h2>".format(self.metadata['Name'])
+        name = self.metadata.get('Name', 'EMPTY')
+        out = "<h2><u>{}</u></h2>".format(name)
         for key in self.metadata:
             if not key == 'Name':
                 out += "<h3 style=\"margin: 20px;\"><b>{}</b>: {}</h3>".format(key, self.metadata[key])
@@ -97,7 +103,8 @@ class Tree(object):
         return out
 
     def __str__(self):
-        out = "Name: {}\n".format(self.metadata['Name'])
+        name = self.metadata.get('Name', 'EMPTY')
+        out = "Name: {}\n".format(name)
         out += "{} branches: \n".format(len(self.branches))
         for branch in self.branches:
             out += "\t{}\n".format(self.branches[branch].__repr__())

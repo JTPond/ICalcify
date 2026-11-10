@@ -1,24 +1,16 @@
-import msgpack as msg
-import msgpack_numpy as m
 import numpy as np
-from io import BytesIO
-import json
-from pathlib import Path
-from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import pyplot as plt
 from scipy.optimize import curve_fit
-from scipy.stats import linregress
 from ICalcify.fitting import FittingResult
-from ICalcify.regression import RegResult
-m.patch()
+
 
 class ObjectBranch(object):
     def __init__(self, name, dtype, branch):
         self.name = name
         self.dtype = dtype
-        if type(branch) == list:
-            self.branch = np.array(branch,dtype=object)
-        elif type(branch) == np.array or type(branch) == np.ndarray:
+        if isinstance(branch, list):
+            self.branch = np.array(branch, dtype=object)
+        elif isinstance(branch, np.ndarray):
             self.branch = branch
         else:
             raise TypeError('Argument \'Branch\' must be of type list, or numpy.(nd)array, got {}'.format(type(branch)))
@@ -27,191 +19,236 @@ class ObjectBranch(object):
         return len(self.branch)
 
     def __repr__(self):
-        return "{{Name: '{}', Type: '{}', Length: {}}}".format(self.name,self.dtype,self.__len__())
+        return "{{Name: '{}', Type: '{}', Length: {}}}".format(self.name, self.dtype, self.__len__())
 
     def __str__(self):
         ll = self.__len__()
         if ll > 20:
-            return "Name: '{}'\n{}\n...\n{}\nType: '{}', Len: {}".format(self.name,"\n".join([str(x) for x in self.branch[:10]]),
-                                                                        "\n".join([str(x) for x in self.branch[-10:]]),self.dtype,ll)
+            return "Name: '{}'\n{}\n...\n{}\nType: '{}', Len: {}".format(
+                self.name,
+                "\n".join([str(x) for x in self.branch[:10]]),
+                "\n".join([str(x) for x in self.branch[-10:]]),
+                self.dtype,
+                ll,
+            )
         else:
-            return "Name: '{}'\n{}\nType: '{}', Len: {}".format(self.name,"\n".join([str(x) for x in self.branch]),self.dtype,ll)
+            return "Name: '{}'\n{}\nType: '{}', Len: {}".format(
+                self.name, "\n".join([str(x) for x in self.branch]), self.dtype, ll
+            )
 
     def __iter__(self):
         return self.branch.__iter__()
 
-    def __next__(self):
-        return self.branch.__next__()
-
     def _repr_html_(self):
-        return "<h3><b>'{}':</b> Type: '{}', Length: {}</h3>".format(self.name,self.dtype,self.__len__())
+        return "<h3><b>'{}':</b> Type: '{}', Length: {}</h3>".format(self.name, self.dtype, self.__len__())
 
-    def cut(self,callable):
-        return Branch(f"{self.name}_Cut",self.dtype,self.branch[[callable(x) for x in self.branch]])
+    def cut(self, callable):
+        mask = np.array([bool(callable(x)) for x in self.branch], dtype=bool)
+        return Branch(f"{self.name}_Cut", self.dtype, self.branch[mask])
 
 
 class StringBranch(ObjectBranch):
-    def __init__(self,name,branch):
+    def __init__(self, name, branch):
         branch = np.array(branch)
-        super().__init__(name,'String',branch)
+        super().__init__(name, 'String', branch)
+
 
 class FloatBranch(ObjectBranch):
-    def __init__(self,name,branch):
-        branch = np.array(branch,dtype=np.float64)
-        super().__init__(name,'f64',branch)
+    def __init__(self, name, branch):
+        branch = np.array(branch, dtype=np.float64)
+        super().__init__(name, 'f64', branch)
 
     def against(self, other):
-        if not type(other) == FloatBranch:
+        if not isinstance(other, FloatBranch):
             raise TypeError("Other branch must be of type FloatBranch")
         if not len(self.branch) == len(other.branch):
             raise RuntimeError("Both self and other branch must be the same length.")
-        return PointBranch(f"{self.name} X {other.name}",np.array([[x,y] for x,y in zip(self.branch,other.branch)]))
+        return PointBranch(f"{self.name} X {other.name}", np.array([[x, y] for x, y in zip(self.branch, other.branch)]))
 
-    def plot(self,show=False,flag=None):
+    def plot(self, show=False, flag=None):
         if show:
             plt.figure()
-        plt.plot(np.arange(self.__len__()),self.branch,label=f"{self.name}_{flag}" if flag else self.name)
+        plt.plot(np.arange(self.__len__()), self.branch, label=f"{self.name}_{flag}" if flag else self.name)
         plt.legend()
         if show:
             plt.show()
 
+
 class ThreeVecBranch(ObjectBranch):
-    def __init__(self,name,branch):
+    def __init__(self, name, branch):
         if len(branch) > 0:
-            if type(branch[0]) == dict:
-                branch = np.array(list(map(ThreeVecBranch.from_dict,branch)))
+            if isinstance(branch[0], dict):
+                branch = np.array(list(map(ThreeVecBranch.from_dict, branch)))
         branch = np.array(branch)
-        super().__init__(name,'ThreeVec',branch)
+        super().__init__(name, 'ThreeVec', branch)
 
+    @staticmethod
     def from_dict(obj):
-        return np.array([obj['x0'],obj['x1'],obj['x2']])
+        return np.array([obj['x0'], obj['x1'], obj['x2']])
 
-    def scatter(self,show=False):
+    def scatter(self, show=False):
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
-        ax.scatter(self.branch[:,0],self.branch[:,1],self.branch[:,2],marker='o')
+        ax.scatter(self.branch[:, 0], self.branch[:, 1], self.branch[:, 2], marker='o')
         ax.set_xlabel('X')
         ax.set_ylabel('Y')
         ax.set_zlabel('Z')
         if show:
             plt.show()
 
-class ThreeMatBranch(ObjectBranch):
-    def __init__(self,name,branch):
-        if len(branch) > 0:
-            if type(branch[0]) == dict:
-                branch = np.array(list(map(ThreeMatBranch.from_dict,branch)))
-        branch = np.array(branch)
-        super().__init__(name,'ThreeMat',branch)
 
+class ThreeMatBranch(ObjectBranch):
+    def __init__(self, name, branch):
+        if len(branch) > 0:
+            if isinstance(branch[0], dict):
+                branch = np.array(list(map(ThreeMatBranch.from_dict, branch)))
+        branch = np.array(branch)
+        super().__init__(name, 'ThreeMat', branch)
+
+    @staticmethod
     def from_dict(obj):
-        return np.array([np.array([obj[ky]['x0'],obj[ky]['x1'],obj[ky]['x2']]) for ky in obj])
+        return np.array([np.array([obj[ky]['x0'], obj[ky]['x1'], obj[ky]['x2']]) for ky in obj])
+
 
 class FourVecBranch(ObjectBranch):
-    def __init__(self,name,branch):
+    def __init__(self, name, branch):
         if len(branch) > 0:
-            if type(branch[0]) == dict:
-                branch = np.array(list(map(FourVecBranch.from_dict,branch)))
+            if isinstance(branch[0], dict):
+                branch = np.array(list(map(FourVecBranch.from_dict, branch)))
         branch = np.array(branch)
-        super().__init__(name,'FourVec',branch)
+        super().__init__(name, 'FourVec', branch)
 
+    @staticmethod
     def from_dict(obj):
-        return np.array([obj['x0'],obj['x1'],obj['x2'],obj['x3']])
+        return np.array([obj['x0'], obj['x1'], obj['x2'], obj['x3']])
+
 
 class FourMatBranch(ObjectBranch):
-    def __init__(self,name,branch):
+    def __init__(self, name, branch):
         if len(branch) > 0:
-            if type(branch[0]) == dict:
-                branch = np.array(list(map(FourMatBranch.from_dict,branch)))
+            if isinstance(branch[0], dict):
+                branch = np.array(list(map(FourMatBranch.from_dict, branch)))
         branch = np.array(branch)
-        super().__init__(name,'FourMat',branch)
+        super().__init__(name, 'FourMat', branch)
 
+    @staticmethod
     def from_dict(obj):
-        return np.array([np.array([obj[ky]['x0'],obj[ky]['x1'],obj[ky]['x2'],obj[ky]['x3']]) for ky in obj])
+        return np.array([np.array([obj[ky]['x0'], obj[ky]['x1'], obj[ky]['x2'], obj[ky]['x3']]) for ky in obj])
+
 
 class BinBranch(ObjectBranch):
-    def __init__(self,name,branch):
+    def __init__(self, name, branch):
         if len(branch) > 0:
-            if type(branch[0]) == dict:
-                branch = np.array(list(map(BinBranch.from_dict,branch)),dtype=object)
+            if isinstance(branch[0], dict):
+                branch = np.array(list(map(BinBranch.from_dict, branch)), dtype=object)
             else:
-                branch = np.array([np.array([np.float64(x[0]),np.array(x[1],dtype=np.float64)],dtype='object') for x in branch],dtype=object)
-        super().__init__(name,'Bin',branch)
+                branch = np.array(
+                    [np.array([np.float64(x[0]), np.array(x[1], dtype=np.float64)], dtype=object) for x in branch],
+                    dtype=object,
+                )
+        super().__init__(name, 'Bin', branch)
 
+    @staticmethod
     def from_dict(obj):
-        return np.array([obj['count'],np.array(obj['range'])],dtype=object)
+        return np.array([obj['count'], np.array(obj['range'])], dtype=object)
 
     def __str__(self):
-        return "Name: '{}'\n{}\n...\n{}\nType: '{}', Len: {}".format(
-                self.name,"\n".join(["{}, range({}, {})".format(int(x[0]),x[1][0],x[1][1]) for x in self.branch[:10]]),
-                "\n".join(["{}, range({}, {})".format(int(x[0]),x[1][0],x[1][1]) for x in self.branch[-10:]]),self.dtype,self.__len__())
+        ll = self.__len__()
+        if ll > 20:
+            return "Name: '{}'\n{}\n...\n{}\nType: '{}', Len: {}".format(
+                self.name,
+                "\n".join(["{}, range({}, {})".format(int(x[0]), x[1][0], x[1][1]) for x in self.branch[:10]]),
+                "\n".join(["{}, range({}, {})".format(int(x[0]), x[1][0], x[1][1]) for x in self.branch[-10:]]),
+                self.dtype,
+                ll,
+            )
+        else:
+            return "Name: '{}'\n{}\nType: '{}', Len: {}".format(
+                self.name,
+                "\n".join(["{}, range({}, {})".format(int(x[0]), x[1][0], x[1][1]) for x in self.branch]),
+                self.dtype,
+                ll,
+            )
 
-    def plot(self,show=False,flag=None):
+    def plot(self, show=False, flag=None):
         if show:
             plt.figure()
         x = []
         y = []
         for bin in self.branch:
             x += list(bin[1])
-            y += [bin[0],bin[0]]
-        plt.plot(x,y,label=f"{self.name}_{flag}" if flag else self.name)
+            y += [bin[0], bin[0]]
+        plt.plot(x, y, label=f"{self.name}_{flag}" if flag else self.name)
         plt.legend()
         if show:
             plt.show()
 
-    def fit(self,func):
+    def fit(self, func):
         x = []
         y = []
         for bin in self.branch:
             x.append(bin[1].mean())
             y.append(bin[0])
-        popt, pcov = curve_fit(func,x,y)
-        return FittingResult(func,x,popt,pcov,self.name)
+        popt, pcov = curve_fit(func, x, y)
+        return FittingResult(func, x, popt, pcov, self.name)
 
 
 class PointBranch(ObjectBranch):
-    def __init__(self,name,branch):
+    def __init__(self, name, branch):
         if len(branch) > 0:
-            if type(branch[0]) == dict:
-                branch = np.array(list(map(PointBranch.from_dict,branch)))
+            if isinstance(branch[0], dict):
+                branch = np.array(list(map(PointBranch.from_dict, branch)))
         branch = np.array(branch)
-        super().__init__(name,'Point',branch)
+        super().__init__(name, 'Point', branch)
 
+    @staticmethod
     def from_dict(obj):
-        return np.array([obj['x'],obj['y']])
+        return np.array([obj['x'], obj['y']])
 
-    def plot(self,show=False,flag=None):
+    def plot(self, show=False, flag=None):
         if show:
             plt.figure()
-        plt.plot(self.branch[:,0],self.branch[:,1],label=f"{self.name}_{flag}" if flag else self.name)
+        plt.plot(self.branch[:, 0], self.branch[:, 1], label=f"{self.name}_{flag}" if flag else self.name)
         plt.legend()
         if show:
             plt.show()
 
-    def scatter(self,show=False,flag=None):
+    def scatter(self, show=False, flag=None):
         if show:
             plt.figure()
-        plt.plot(self.branch[:,0],self.branch[:,1],marker='o',linestyle='',label=f"{self.name}_{flag}" if flag else self.name)
+        plt.plot(
+            self.branch[:, 0],
+            self.branch[:, 1],
+            marker='o',
+            linestyle='',
+            label=f"{self.name}_{flag}" if flag else self.name,
+        )
         plt.legend()
         if show:
             plt.show()
 
-    def fit(self,func):
-        popt, pcov = curve_fit(func,self.branch[:,0],self.branch[:,1])
-        return FittingResult(func,self.branch[:,0],popt,pcov,self.name)
+    def fit(self, func):
+        popt, pcov = curve_fit(func, self.branch[:, 0], self.branch[:, 1])
+        return FittingResult(func, self.branch[:, 0], popt, pcov, self.name)
+
 
 class PointBinBranch(ObjectBranch):
-    def __init__(self,name,branch):
+    def __init__(self, name, branch):
         if len(branch) > 0:
-            if type(branch[0]) == dict:
-                branch = np.array(list(map(PointBinBranch.from_dict,branch)))
-        branch = np.array(branch,dtype=object)
-        super().__init__(name,'PointBin',branch)
+            if isinstance(branch[0], dict):
+                branch = np.array(list(map(PointBinBranch.from_dict, branch)), dtype=object)
+            else:
+                branch = np.array(
+                    [np.array([np.float64(x[0]), np.array(x[1], dtype=np.float64)], dtype=object) for x in branch],
+                    dtype=object,
+                )
+        super().__init__(name, 'PointBin', branch)
 
+    @staticmethod
     def from_dict(obj):
-        return np.array([float(obj['count']),np.array(obj['range'])])
+        return np.array([float(obj['count']), np.array(obj['range'])], dtype=object)
 
-    def plot(self,show=False,flag=None):
+    def plot(self, show=False, flag=None):
         if show:
             plt.figure()
         x = [self.branch[0][1][0]]
@@ -223,7 +260,7 @@ class PointBinBranch(ObjectBranch):
             x.append(bin[1][1])
             y.append(bin[1][3])
             counts[-1].append(bin[0])
-        plt.imshow(counts,extent=[x[0],x[-1],y[0],y[-1]])
+        plt.imshow(counts, extent=[x[0], x[-1], y[0], y[-1]])
 
         plt.colorbar()
         if show:
@@ -232,24 +269,24 @@ class PointBinBranch(ObjectBranch):
 
 def Branch(name, dtype, branch):
     if dtype == 'String':
-        return StringBranch(name,branch)
+        return StringBranch(name, branch)
     elif dtype == 'f64':
-        return FloatBranch(name,branch)
+        return FloatBranch(name, branch)
     elif dtype == 'ThreeVec':
-        return ThreeVecBranch(name,branch)
+        return ThreeVecBranch(name, branch)
     elif dtype == 'ThreeMat':
-        return ThreeMatBranch(name,branch)
+        return ThreeMatBranch(name, branch)
     elif dtype == 'FourVec':
-        return FourVecBranch(name,branch)
+        return FourVecBranch(name, branch)
     elif dtype == 'FourMat':
-        return FourMatBranch(name,branch)
+        return FourMatBranch(name, branch)
     elif dtype == 'Bin':
-        return BinBranch(name,branch)
+        return BinBranch(name, branch)
     elif dtype == 'Point':
-        return PointBranch(name,branch)
+        return PointBranch(name, branch)
     elif dtype == 'PointBin':
-        return PointBinBranch(name,branch)
+        return PointBinBranch(name, branch)
     elif dtype == 'Object':
-        return ObjectBranch(name,dtype,branch)
+        return ObjectBranch(name, dtype, branch)
     else:
         raise ValueError(f"Argument, '{dtype}' is not an accepted value.")

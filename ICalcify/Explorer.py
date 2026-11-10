@@ -1,15 +1,7 @@
-import msgpack as msg
-import msgpack_numpy as m
-import numpy as np
-from io import BytesIO
-import json
-from pathlib import Path
-
 from ICalcify.Tree import read, Tree
 
-m.patch()
 
-def New(fnames,buffer=False):
+def New(fnames, buffer=False):
     trees = dict([read(f,buffer=buffer,retname=True) for f in fnames])
     return Explorer(trees)
 

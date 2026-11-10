@@ -7,7 +7,7 @@ Includes plotting and fitting tools.
 
 Clone the repository and from inside run:
 
-`(sudo) python(3) setup.py install`
+`pip install .`
 
 This will install the `icalcify` command line tool and the ICalcify library.
 
